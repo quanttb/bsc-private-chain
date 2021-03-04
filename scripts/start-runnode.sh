@@ -14,10 +14,8 @@ NODE_NAME=$1
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-NETWORK_NAME=ethereum
-CONTAINER_NAME=ethereum-${NODE_NAME}
-# IMAGE_NAME=ethereum/client-go
-# IMAGE_TAG=v1.8.12
+NETWORK_NAME=bsc
+CONTAINER_NAME=bsc-${NODE_NAME}
 IMAGE_NAME=bsc/client-go
 IMAGE_TAG=v0.0.1
 DATA_ROOT=${SCRIPT_DIR}/../data/.ether-${NODE_NAME}
@@ -48,7 +46,7 @@ fi
 if [ ! -d ${DATA_ROOT}/keystore ]; then
   echo "${DATA_ROOT}/keystore not found, running 'geth init'..."
   docker run --rm \
-    -v ${DATA_ROOT}:/root/.ethereum \
+    -v ${DATA_ROOT}:/root/.bsc \
     -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
     ${IMAGE_NAME}:${IMAGE_TAG} init /opt/genesis.json
   echo "...done!"
@@ -56,8 +54,8 @@ fi
 
 echo "Running new container ${CONTAINER_NAME}..."
 docker run -d --name ${CONTAINER_NAME} \
-  --network ethereum \
-  -v ${DATA_ROOT}:/root/.ethereum \
+  --network bsc \
+  -v ${DATA_ROOT}:/root/.bsc \
   -v ${DATA_HASH}:/root/.ethash \
   -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
   ${RPC_PORTMAP} \

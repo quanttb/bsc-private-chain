@@ -14,6 +14,6 @@ NODE_NAME=$1
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-CONTAINER_NAME=ethereum-${NODE_NAME}
+CONTAINER_NAME=bsc-${NODE_NAME}
 
 docker exec -ti "${CONTAINER_NAME}" geth --exec 'admin.peers' attach

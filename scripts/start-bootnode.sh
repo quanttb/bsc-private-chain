@@ -5,10 +5,8 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-NETWORK_NAME=ethereum
-CONTAINER_NAME=ethereum-bootnode
-# IMAGE_NAME=ethereum/client-go
-# IMAGE_TAG=alltools-v1.8.12
+NETWORK_NAME=bsc
+CONTAINER_NAME=bsc-bootnode
 IMAGE_NAME=bsc/client-go
 IMAGE_TAG=alltools-v0.0.1
 DATA_ROOT=${SCRIPT_DIR}/../data
@@ -29,9 +27,9 @@ if [ ! -f ${DATA_ROOT}/.bootnode/boot.key ]; then
   echo "...done!"
 fi
 
-# Creates ethereum network
-[ ! "$(docker network ls | grep ethereum)" ] && docker network create ${NETWORK_NAME}
-docker run -d --name ethereum-bootnode \
+# Creates bsc network
+[ ! "$(docker network ls | grep bsc)" ] && docker network create ${NETWORK_NAME}
+docker run -d --name bsc-bootnode \
   -v ${DATA_ROOT}/.bootnode:/opt/bootnode \
   --network ${NETWORK_NAME} \
   ${IMAGE_NAME}:${IMAGE_TAG} \
