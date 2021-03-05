@@ -4,33 +4,36 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+source ${SCRIPT_DIR}/../common.sh
 
-NETWORK_NAME=bsc
 CONTAINER_NAME=bsc-bootnode
-IMAGE_NAME=bsc/client-go
-IMAGE_TAG=alltools-v0.0.1
-DATA_ROOT=${SCRIPT_DIR}/../data
-# BOOTNODE_SERVICE="127.0.0.1"
+DATA_ROOT=${SCRIPT_DIR}/../data/.ether-bootnode
+
+mkdir -p ${DATA_ROOT}
 
 echo "Destroying old container ${CONTAINER_NAME}..."
 docker stop ${CONTAINER_NAME} || true
 docker rm ${CONTAINER_NAME} || true
 
-# Generate bootnode key if needed
-mkdir -p ${DATA_ROOT}/.bootnode
-if [ ! -f ${DATA_ROOT}/.bootnode/boot.key ]; then
-  echo "${DATA_ROOT}/.bootnode/boot.key not found, generating..."
-  docker run --rm \
-    -v ${DATA_ROOT}/.bootnode:/opt/bootnode \
-    ${IMAGE_NAME}:${IMAGE_TAG} \
-    bootnode --genkey /opt/bootnode/boot.key
+if [ ! -f ${SCRIPT_DIR}/../data/genesis.json ]; then
+  echo "No genesis.json file found, generating..."
+  ${SCRIPT_DIR}/get-genesis.sh
   echo "...done!"
 fi
 
-# Creates bsc network
-[ ! "$(docker network ls | grep bsc)" ] && docker network create ${NETWORK_NAME}
-docker run -d --name bsc-bootnode \
-  -v ${DATA_ROOT}/.bootnode:/opt/bootnode \
-  --network ${NETWORK_NAME} \
-  ${IMAGE_NAME}:${IMAGE_TAG} \
-  bootnode --nodekey /opt/bootnode/boot.key "$@"
+if [ ! -d ${DATA_ROOT}/keystore ]; then
+  echo "${DATA_ROOT}/keystore not found, running 'geth init'..."
+  docker run --rm \
+    -v ${DATA_ROOT}:/root/.ethereum \
+    -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
+    ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} init /opt/genesis.json
+  echo "...done!"
+fi
+
+echo "Running new container ${CONTAINER_NAME}..."
+docker run -d --name ${CONTAINER_NAME} \
+  --network ${DOCKER_NETWORK_NAME} \
+  -v ${DATA_ROOT}:/root/.ethereum \
+  -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
+  ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} --networkid=${NETWORK_ID} \
+    --port=${BOOTNODE_PORT} --nousb ${@:1}

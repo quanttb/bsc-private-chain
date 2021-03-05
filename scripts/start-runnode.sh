@@ -13,11 +13,9 @@ fi
 NODE_NAME=$1
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+source ${SCRIPT_DIR}/../common.sh
 
-NETWORK_NAME=bsc
 CONTAINER_NAME=bsc-${NODE_NAME}
-IMAGE_NAME=bsc/client-go
-IMAGE_TAG=v0.0.1
 DATA_ROOT=${SCRIPT_DIR}/../data/.ether-${NODE_NAME}
 DATA_HASH=${SCRIPT_DIR}/../data/.ethash
 
@@ -27,36 +25,30 @@ echo "Destroying old container ${CONTAINER_NAME}..."
 docker stop ${CONTAINER_NAME} || true
 docker rm ${CONTAINER_NAME} || true
 
-RPC_PORTMAP=
-RPC_ARG=
-
 if [ ! -z "${RPC_PORT}" ]; then
   RPC_ARG='--rpc --rpcaddr=0.0.0.0 --rpcport 8545 --rpcapi=db,eth,net,web3,personal --rpccorsdomain "*"'
   RPC_PORTMAP="-p ${RPC_PORT}:8545"
 fi
 
-BOOTNODE_URL=$(${SCRIPT_DIR}/get-bootnode-url.sh)
-
-if [ ! -f ${SCRIPT_DIR}/../data/genesis.json ]; then
-  echo "No genesis.json file found, generating..."
-  ${SCRIPT_DIR}/get-genesis.sh
-  echo "...done!"
-fi
+BOOTNODE_URL="$(${SCRIPT_DIR}/get-bootnode-url.sh)"
 
 if [ ! -d ${DATA_ROOT}/keystore ]; then
   echo "${DATA_ROOT}/keystore not found, running 'geth init'..."
   docker run --rm \
-    -v ${DATA_ROOT}:/root/.bsc \
+    -v ${DATA_ROOT}:/root/.ethereum \
     -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
-    ${IMAGE_NAME}:${IMAGE_TAG} init /opt/genesis.json
+    ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} init /opt/genesis.json
   echo "...done!"
 fi
 
 echo "Running new container ${CONTAINER_NAME}..."
 docker run -d --name ${CONTAINER_NAME} \
-  --network bsc \
-  -v ${DATA_ROOT}:/root/.bsc \
+  --network ${DOCKER_NETWORK_NAME} \
+  -v ${DATA_ROOT}:/root/.ethereum \
   -v ${DATA_HASH}:/root/.ethash \
   -v ${SCRIPT_DIR}/../data/genesis.json:/opt/genesis.json \
   ${RPC_PORTMAP} \
-  ${IMAGE_NAME}:${IMAGE_TAG} --bootnodes=${BOOTNODE_URL} ${RPC_ARG} --cache=512 --verbosity=4 --maxpeers=3 ${@:2}
+  ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} --networkid=${NETWORK_ID} ${RPC_ARG} \
+    --cache=512 --verbosity=4 --maxpeers=3 --nodiscover --nousb ${@:2}
+
+docker exec -ti ${CONTAINER_NAME} geth --exec "admin.addPeer(\"${BOOTNODE_URL}\")" attach > /dev/null

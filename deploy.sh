@@ -18,22 +18,22 @@ then
   git clone https://github.com/binance-chain/bsc.git src
   docker build --tag bsc/client-go:v0.0.1 \
     --file ${SCRIPT_DIR}/src/Dockerfile ${SCRIPT_DIR}/src
-  docker build --tag bsc/client-go:alltools-v0.0.1 \
-    --file ${SCRIPT_DIR}/src/Dockerfile.alltools ${SCRIPT_DIR}/src
+  # docker build --tag bsc/client-go:alltools-v0.0.1 \
+  #   --file ${SCRIPT_DIR}/src/Dockerfile.alltools ${SCRIPT_DIR}/src
 fi
 
 ${SCRIPT_DIR}/scripts/start-bootnode.sh
 echo "--------------------------------------------------"
 ${SCRIPT_DIR}/scripts/start-runnode.sh node1
 echo "--------------------------------------------------"
-${SCRIPT_DIR}/scripts/start-runnode.sh node2
-echo "--------------------------------------------------"
+# ${SCRIPT_DIR}/scripts/start-runnode.sh node2
+# echo "--------------------------------------------------"
 
 sleep 5
 ${SCRIPT_DIR}/scripts/show-peers.sh node1
 echo "--------------------------------------------------"
-${SCRIPT_DIR}/scripts/show-peers.sh node2
-echo "--------------------------------------------------"
+# ${SCRIPT_DIR}/scripts/show-peers.sh node2
+# echo "--------------------------------------------------"
 
 ${SCRIPT_DIR}/scripts/start-miner.sh miner1 8545
 echo "--------------------------------------------------"
