@@ -30,6 +30,9 @@ if [ ! -d ${DATA_ROOT}/keystore ]; then
   echo "...done!"
 fi
 
+# Creates ethereum network
+[ ! "$(docker network ls | grep ${DOCKER_NETWORK_NAME}
+
 echo "Running new container ${CONTAINER_NAME}..."
 docker run -d --name ${CONTAINER_NAME} \
   --network ${DOCKER_NETWORK_NAME} \
