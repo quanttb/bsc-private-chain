@@ -26,14 +26,18 @@ ${SCRIPT_DIR}/scripts/start-bootnode.sh
 echo "--------------------------------------------------"
 ${SCRIPT_DIR}/scripts/start-runnode.sh node1
 echo "--------------------------------------------------"
-# ${SCRIPT_DIR}/scripts/start-runnode.sh node2
-# echo "--------------------------------------------------"
+${SCRIPT_DIR}/scripts/start-runnode.sh node2
+echo "--------------------------------------------------"
+${SCRIPT_DIR}/scripts/start-runnode.sh node3
+echo "--------------------------------------------------"
 
 sleep 5
 ${SCRIPT_DIR}/scripts/show-peers.sh node1
 echo "--------------------------------------------------"
-# ${SCRIPT_DIR}/scripts/show-peers.sh node2
-# echo "--------------------------------------------------"
+${SCRIPT_DIR}/scripts/show-peers.sh node2
+echo "--------------------------------------------------"
+${SCRIPT_DIR}/scripts/show-peers.sh node3
+echo "--------------------------------------------------"
 
 ${SCRIPT_DIR}/scripts/start-miner.sh miner1 8545
 echo "--------------------------------------------------"

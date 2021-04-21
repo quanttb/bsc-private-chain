@@ -3,6 +3,10 @@
 ## Overview
 
 - Based on [Local Binance Smart Chain Network](https://docs.binance.org/smart-chain/developer/deploy/local.html) and [Ethereum Private Chain](https://github.com/quanttb/ethereum-private-chain).
+- This network includes:
+    - 1 bootnode
+    - 3 runnodes
+    - 1 miners
 
 ## Prerequisites
 
